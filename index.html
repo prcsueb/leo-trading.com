@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>leo-trading.com - Coming Soon</title>
+    <title>leo-trading.com</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,9 +11,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            overflow: hidden; /* Prevents scrollbars from the canvas */
         }
-        /* Canvas is positioned behind all content */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -23,11 +21,9 @@
             z-index: -1;
             background: linear-gradient(45deg, #2a2a1a, #1a1a00, #000000);
         }
-        /* Custom class for the glowing effect */
         .text-glow {
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 25px rgba(251, 191, 36, 0.7);
         }
-        /* Keyframes for the floating animation */
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
@@ -36,34 +32,35 @@
         .animate-float {
             animation: float 6s ease-in-out infinite;
         }
+        nav a {
+            transition: color 0.2s;
+        }
     </style>
 </head>
 <body class="text-white">
-    <!-- The animated background canvas -->
     <canvas id="particle-canvas"></canvas>
 
-    <!-- Main content container -->
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 w-full z-20 bg-black/60 backdrop-blur-md border-b border-yellow-400/20">
+        <div class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
+            <a href="index.html" class="text-xl font-bold text-yellow-400 tracking-wide">leo-trading<span class="text-white">.com</span></a>
+            <div class="flex gap-8 text-sm font-medium tracking-wider">
+                <a href="index.html" class="text-yellow-400 hover:text-yellow-300">Home</a>
+                <a href="position-calculator.html" class="text-gray-300 hover:text-yellow-400">Calculator</a>
+            </div>
+        </div>
+    </nav>
+
     <main class="relative flex flex-col items-center justify-center min-h-screen p-6 text-center">
-        <div class="absolute inset-0 bg-black opacity-30"></div> <!-- Overlay for text readability -->
+        <div class="absolute inset-0 bg-black opacity-30"></div>
         <div class="relative z-10 animate-float">
-            <!-- Main Title -->
             <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-wider text-glow">
                 leo-trading<span class="text-yellow-400">.</span>com
             </h1>
-
-            <!-- Subtitle -->
             <p class="mt-4 text-xl md:text-2xl font-light text-yellow-100">
                 A new era of trading is on the horizon.
             </p>
-
-            <!-- "Coming Soon" Badge -->
-            <div class="mt-8">
-                <span class="bg-yellow-400 text-gray-900 font-semibold px-6 py-3 rounded-full text-lg shadow-lg shadow-yellow-400/30">
-                    COMING SOON
-                </span>
-            </div>
         </div>
-
     </main>
 
     <script>

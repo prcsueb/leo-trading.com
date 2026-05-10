@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Sizing Calculator</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --heading: #0f172a;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --input-text: #1e293b;
+            --input-prefix: #94a3b8;
+            --results-bg: #f8fafc;
+            --results-border: #e2e8f0;
+            --results-divider: #e2e8f0;
+            --error-color: #dc2626;
+            --btn-bg: #2563eb;
+            --btn-hover: #1d4ed8;
+            --btn-disabled: #94a3b8;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --highlight-green: #059669;
+            --highlight-red: #dc2626;
+            --highlight-blue: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --heading: #f1f5f9;
+            --input-bg: #0f172a;
+            --input-border: #334155;
+            --input-text: #f1f5f9;
+            --input-prefix: #64748b;
+            --results-bg: #0f172a;
+            --results-border: #334155;
+            --results-divider: #1e293b;
+            --error-color: #f87171;
+            --btn-bg: #3b82f6;
+            --btn-hover: #2563eb;
+            --btn-disabled: #475569;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --highlight-green: #34d399;
+            --highlight-red: #f87171;
+            --highlight-blue: #60a5fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 60px var(--shadow);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--heading);
+            transition: color 0.3s;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            transition: color 0.3s;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 6px 10px;
+            line-height: 1;
+            transition: border-color 0.3s, color 0.3s;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--btn-bg);
+            color: var(--btn-bg);
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            transition: color 0.3s;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--input-prefix);
+            font-size: 0.95rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .input-wrapper .suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--input-prefix);
+            font-size: 0.8rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            color: var(--input-text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
+            outline: none;
+        }
+
+        input.has-prefix { padding-left: 36px; }
+        input.has-suffix { padding-right: 40px; }
+        input.has-both { padding-left: 36px; padding-right: 40px; }
+
+        input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .error {
+            font-size: 0.75rem;
+            color: var(--error-color);
+            margin-top: 4px;
+            min-height: 1rem;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: var(--btn-bg);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.2s;
+        }
+
+        button[type="submit"]:hover { background: var(--btn-hover); }
+        button[type="submit"]:disabled { background: var(--btn-disabled); cursor: not-allowed; }
+
+        .results {
+            margin-top: 24px;
+            background: var(--results-bg);
+            border: 1px solid var(--results-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .results.visible { display: block; }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--results-divider);
+            transition: border-color 0.3s;
+        }
+
+        .result-row:last-child { border-bottom: none; }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .result-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            transition: color 0.3s;
+        }
+
+        .highlight-green { color: var(--highlight-green); }
+        .highlight-red { color: var(--highlight-red); }
+        .highlight-blue { color: var(--highlight-blue); }
+    </style>
+</head>
+<body>
+    <nav style="position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;justify-content:center;gap:32px;padding:14px 24px;background:var(--card-bg);border-bottom:1px solid var(--card-border);font-size:0.85rem;font-weight:600;letter-spacing:0.05em;">
+        <a href="index.html" style="color:var(--text-muted);text-decoration:none;">Home</a>
+        <a href="position-calculator.html" style="color:#3b82f6;text-decoration:none;">Calculator</a>
+    </nav>
+    <div class="card" style="margin-top:60px;">
+        <div class="card-header">
+            <h1>Position Sizing Calculator</h1>
+            <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark / light mode">
+                &#9788;
+            </button>
+        </div>
+        <p class="subtitle">Control how much to invest and compute your stop loss.</p>
+
+        <form id="calcForm">
+            <div class="field">
+                <label for="portfolio">Portfolio Size</label>
+                <div class="input-wrapper">
+                    <span class="prefix">$</span>
+                    <input type="number" id="portfolio" class="has-prefix" placeholder="10,000" min="0.01" step="0.01" required autofocus>
+                </div>
+                <div class="error" id="portfolioError"></div>
+            </div>
+
+            <div class="field">
+                <label for="risk">Max Risk (% of portfolio)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="risk" class="has-suffix" placeholder="2" min="0.01" max="100" step="0.01" required>
+                    <span class="suffix">%</span>
+                </div>
+                <div class="error" id="riskError"></div>
+            </div>
+
+            <div class="field">
+                <label for="investment">Investment Amount (how much to invest)</label>
+                <div class="input-wrapper">
+                    <span class="prefix">$</span>
+                    <input type="number" id="investment" class="has-prefix" placeholder="2,000" min="0.01" step="0.01" required>
+                </div>
+                <div class="error" id="investmentError"></div>
+            </div>
+
+            <div class="field">
+                <label for="maxLoss">Max Loss (% of investment)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="maxLoss" class="has-suffix" placeholder="9" min="0.01" max="100" step="0.01" required>
+                    <span class="suffix">%</span>
+                </div>
+                <div class="error" id="maxLossError"></div>
+            </div>
+
+            <div class="field">
+                <label for="price">Stock Price (per share)</label>
+                <div class="input-wrapper">
+                    <span class="prefix">$</span>
+                    <input type="number" id="price" class="has-prefix" placeholder="100" min="0.01" step="0.01" required>
+                </div>
+                <div class="error" id="priceError"></div>
+            </div>
+
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div class="results" id="results">
+            <div class="result-row">
+                <span class="result-label">Shares to Buy</span>
+                <span class="result-value highlight-blue" id="shares">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Total Investment</span>
+                <span class="result-value" id="investment">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Portfolio Risk</span>
+                <span class="result-value highlight-red" id="portfolioRisk">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Investment Max Loss</span>
+                <span class="result-value highlight-red" id="investmentLoss">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Binding Constraint</span>
+                <span class="result-value" id="bindingConstraint">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Stop Loss Price</span>
+                <span class="result-value highlight-green" id="stopLoss">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Loss Per Share</span>
+                <span class="result-value" id="lossPerShare">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Theme toggle ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '&#9788;';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '&#9790;';
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            setTheme('dark');
+        }
+
+        themeToggle.addEventListener('click', function () {
+            const current = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(current);
+        });
+
+        const form = document.getElementById('calcForm');
+        const resultsDiv = document.getElementById('results');
+
+        const portfolioInput = document.getElementById('portfolio');
+        const riskInput = document.getElementById('risk');
+        const investmentInput = document.getElementById('investment');
+        const maxLossInput = document.getElementById('maxLoss');
+        const priceInput = document.getElementById('price');
+
+        function formatCurrency(val) {
+            return '$' + val.toFixed(2);
+        }
+
+        function setError(id, msg) {
+            document.getElementById(id).textContent = msg;
+        }
+
+        function clearErrors() {
+            setError('portfolioError', '');
+            setError('riskError', '');
+            setError('investmentError', '');
+            setError('maxLossError', '');
+            setError('priceError', '');
+        }
+
+        // --- Two-way sync between Max Loss (% of investment) and Max Risk (% of portfolio) ---
+        //    risk%  = maxLoss% × investAmount / portfolio
+        //    maxLoss% = risk% × portfolio / investAmount
+
+        let syncing = false;
+
+        function syncMaxLossToRisk() {
+            if (syncing) return;
+            const portfolio = parseFloat(portfolioInput.value);
+            const investAmount = parseFloat(investmentInput.value);
+            const maxLossPct = parseFloat(maxLossInput.value);
+            if (portfolio && investAmount && maxLossPct && portfolio > 0 && investAmount > 0) {
+                syncing = true;
+                riskInput.value = ((maxLossPct * investAmount) / portfolio).toFixed(2);
+                syncing = false;
+            }
+        }
+
+        function syncRiskToMaxLoss() {
+            if (syncing) return;
+            const portfolio = parseFloat(portfolioInput.value);
+            const investAmount = parseFloat(investmentInput.value);
+            const riskPct = parseFloat(riskInput.value);
+            if (portfolio && investAmount && riskPct && portfolio > 0 && investAmount > 0) {
+                syncing = true;
+                maxLossInput.value = ((riskPct * portfolio) / investAmount).toFixed(2);
+                syncing = false;
+            }
+        }
+
+        maxLossInput.addEventListener('input', syncMaxLossToRisk);
+        riskInput.addEventListener('input', syncRiskToMaxLoss);
+        portfolioInput.addEventListener('input', function () {
+            if (document.activeElement === maxLossInput) {
+                syncMaxLossToRisk();
+            } else if (document.activeElement === riskInput) {
+                syncRiskToMaxLoss();
+            }
+        });
+        investmentInput.addEventListener('input', function () {
+            if (document.activeElement === maxLossInput) {
+                syncMaxLossToRisk();
+            } else if (document.activeElement === riskInput) {
+                syncRiskToMaxLoss();
+            }
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearErrors();
+
+            const portfolio = parseFloat(portfolioInput.value);
+            const riskPct = parseFloat(riskInput.value);
+            const investAmount = parseFloat(investmentInput.value);
+            const maxLossPct = parseFloat(maxLossInput.value);
+            const price = parseFloat(priceInput.value);
+
+            let valid = true;
+
+            if (!portfolio || portfolio <= 0) {
+                setError('portfolioError', 'Enter a positive portfolio size.');
+                valid = false;
+            }
+
+            if (!riskPct || riskPct <= 0 || riskPct > 100) {
+                setError('riskError', 'Enter a risk between 0.01% and 100%.');
+                valid = false;
+            }
+
+            if (!investAmount || investAmount <= 0) {
+                setError('investmentError', 'Enter a positive investment amount.');
+                valid = false;
+            } else if (investAmount > portfolio) {
+                setError('investmentError', 'Investment exceeds portfolio size.');
+                valid = false;
+            }
+
+            if (!maxLossPct || maxLossPct <= 0 || maxLossPct > 100) {
+                setError('maxLossError', 'Enter a max loss between 0.01% and 100%.');
+                valid = false;
+            }
+
+            if (!price || price <= 0) {
+                setError('priceError', 'Enter a positive stock price.');
+                valid = false;
+            }
+
+            if (!valid) {
+                resultsDiv.classList.remove('visible');
+                return;
+            }
+
+            const shares = Math.floor(investAmount / price);
+            if (shares === 0) {
+                setError('priceError', 'Stock price exceeds your investment amount.');
+                resultsDiv.classList.remove('visible');
+                return;
+            }
+
+            const actualInvestment = shares * price;
+
+            // Two constraints — pick whichever is tighter (higher stop loss)
+            const portfolioRiskDollars = portfolio * (riskPct / 100);
+            const investLossDollars = investAmount * (maxLossPct / 100);
+
+            const portfolioLps = portfolioRiskDollars / shares;       // loss per share from portfolio constraint
+            const investLps = investLossDollars / shares;             // loss per share from investment constraint
+
+            // Pick the tighter (smaller) loss-per-share → higher stop loss
+            let lossPerShare, bindingConstraint;
+            if (portfolioLps <= investLps) {
+                lossPerShare = portfolioLps;
+                bindingConstraint = 'Portfolio Risk';
+            } else {
+                lossPerShare = investLps;
+                bindingConstraint = 'Investment Loss';
+            }
+
+            const stopLoss = price - lossPerShare;
+
+            document.getElementById('shares').textContent = shares;
+            document.getElementById('investment').textContent = formatCurrency(actualInvestment);
+            document.getElementById('portfolioRisk').textContent = formatCurrency(portfolioRiskDollars) + ' (' + riskPct.toFixed(2) + '%)';
+            document.getElementById('investmentLoss').textContent = formatCurrency(investLossDollars) + ' (' + maxLossPct.toFixed(2) + '%)';
+            document.getElementById('bindingConstraint').textContent = bindingConstraint;
+            document.getElementById('stopLoss').textContent = formatCurrency(stopLoss);
+            document.getElementById('lossPerShare').textContent = formatCurrency(lossPerShare);
+
+            resultsDiv.classList.add('visible');
+        });
+    </script>
+</body>
+</html>
