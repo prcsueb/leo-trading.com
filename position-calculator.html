@@ -289,21 +289,21 @@
             </div>
 
             <div class="field">
-                <label for="maxLoss">Max Loss (% of investment)</label>
-                <div class="input-wrapper">
-                    <input type="number" id="maxLoss" class="has-suffix" placeholder="9" min="0.01" max="100" step="0.01" required>
-                    <span class="suffix">%</span>
-                </div>
-                <div class="error" id="maxLossError"></div>
-            </div>
-
-            <div class="field">
                 <label for="price">Stock Price (per share)</label>
                 <div class="input-wrapper">
                     <span class="prefix">$</span>
                     <input type="number" id="price" class="has-prefix" placeholder="100" min="0.01" step="0.01" required>
                 </div>
                 <div class="error" id="priceError"></div>
+            </div>
+
+            <div class="field">
+                <label for="maxLoss">Max Loss (% of stock price)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="maxLoss" class="has-suffix" placeholder="5" min="0.01" max="100" step="0.01" required>
+                    <span class="suffix">%</span>
+                </div>
+                <div class="error" id="maxLossError"></div>
             </div>
 
             <button type="submit">Calculate</button>
@@ -323,11 +323,11 @@
                 <span class="result-value highlight-red" id="portfolioRisk">-</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Investment Max Loss</span>
+                <span class="result-label">Max Loss in Dollars</span>
                 <span class="result-value highlight-red" id="investmentLoss">-</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Binding Constraint</span>
+                <span class="result-label">Stop Loss Distance</span>
                 <span class="result-value" id="bindingConstraint">-</span>
             </div>
             <div class="result-row">
@@ -392,50 +392,56 @@
             setError('priceError', '');
         }
 
-        // --- Two-way sync between Max Loss (% of investment) and Max Risk (% of portfolio) ---
-        //    risk%  = maxLoss% × investAmount / portfolio
-        //    maxLoss% = risk% × portfolio / investAmount
+        // --- Two-way sync: Max Risk % ↔ Investment Amount ---
+        //    investmentAmount = portfolio × riskPct / maxLossPct   (risk drives amount)
+        //    riskPct = investmentAmount × maxLossPct / portfolio   (amount drives risk)
+        //
+        //    When maxLossPct changes → investmentAmount recalculates, riskPct stays the same.
 
         let syncing = false;
+        let lastEdited = 'risk'; // 'risk' or 'amount'
 
-        function syncMaxLossToRisk() {
+        function recalcAmountFromRisk() {
+            if (syncing) return;
+            const portfolio = parseFloat(portfolioInput.value);
+            const riskPct = parseFloat(riskInput.value);
+            const maxLossPct = parseFloat(maxLossInput.value);
+            if (portfolio > 0 && riskPct > 0 && maxLossPct > 0) {
+                lastEdited = 'risk';
+                syncing = true;
+                investmentInput.value = ((portfolio * riskPct) / maxLossPct).toFixed(2);
+                syncing = false;
+            }
+        }
+
+        function recalcRiskFromAmount() {
             if (syncing) return;
             const portfolio = parseFloat(portfolioInput.value);
             const investAmount = parseFloat(investmentInput.value);
             const maxLossPct = parseFloat(maxLossInput.value);
-            if (portfolio && investAmount && maxLossPct && portfolio > 0 && investAmount > 0) {
+            if (portfolio > 0 && investAmount > 0 && maxLossPct > 0) {
+                lastEdited = 'amount';
                 syncing = true;
-                riskInput.value = ((maxLossPct * investAmount) / portfolio).toFixed(2);
+                riskInput.value = ((investAmount * maxLossPct) / portfolio).toFixed(2);
                 syncing = false;
             }
         }
 
-        function syncRiskToMaxLoss() {
-            if (syncing) return;
-            const portfolio = parseFloat(portfolioInput.value);
-            const investAmount = parseFloat(investmentInput.value);
-            const riskPct = parseFloat(riskInput.value);
-            if (portfolio && investAmount && riskPct && portfolio > 0 && investAmount > 0) {
-                syncing = true;
-                maxLossInput.value = ((riskPct * portfolio) / investAmount).toFixed(2);
-                syncing = false;
-            }
-        }
+        // Max Risk % edited → recalculate Investment Amount
+        riskInput.addEventListener('input', recalcAmountFromRisk);
 
-        maxLossInput.addEventListener('input', syncMaxLossToRisk);
-        riskInput.addEventListener('input', syncRiskToMaxLoss);
+        // Max Loss % edited → recalculate Investment Amount, keep Risk % same
+        maxLossInput.addEventListener('input', recalcAmountFromRisk);
+
+        // Investment Amount edited → recalculate Max Risk %
+        investmentInput.addEventListener('input', recalcRiskFromAmount);
+
+        // Portfolio Size edited → recalculate based on last edited
         portfolioInput.addEventListener('input', function () {
-            if (document.activeElement === maxLossInput) {
-                syncMaxLossToRisk();
-            } else if (document.activeElement === riskInput) {
-                syncRiskToMaxLoss();
-            }
-        });
-        investmentInput.addEventListener('input', function () {
-            if (document.activeElement === maxLossInput) {
-                syncMaxLossToRisk();
-            } else if (document.activeElement === riskInput) {
-                syncRiskToMaxLoss();
+            if (lastEdited === 'amount') {
+                recalcRiskFromAmount();
+            } else {
+                recalcAmountFromRisk();
             }
         });
 
@@ -493,30 +499,20 @@
 
             const actualInvestment = shares * price;
 
-            // Two constraints — pick whichever is tighter (higher stop loss)
+            // Loss per share from stop price %: lossPerShare = price × maxLossPct / 100
+            const lossPerShare = price * (maxLossPct / 100);
+
+            // Portfolio risk in dollars
             const portfolioRiskDollars = portfolio * (riskPct / 100);
-            const investLossDollars = investAmount * (maxLossPct / 100);
 
-            const portfolioLps = portfolioRiskDollars / shares;       // loss per share from portfolio constraint
-            const investLps = investLossDollars / shares;             // loss per share from investment constraint
-
-            // Pick the tighter (smaller) loss-per-share → higher stop loss
-            let lossPerShare, bindingConstraint;
-            if (portfolioLps <= investLps) {
-                lossPerShare = portfolioLps;
-                bindingConstraint = 'Portfolio Risk';
-            } else {
-                lossPerShare = investLps;
-                bindingConstraint = 'Investment Loss';
-            }
-
+            // Stop loss price
             const stopLoss = price - lossPerShare;
 
             document.getElementById('shares').textContent = shares;
             document.getElementById('investment').textContent = formatCurrency(actualInvestment);
             document.getElementById('portfolioRisk').textContent = formatCurrency(portfolioRiskDollars) + ' (' + riskPct.toFixed(2) + '%)';
-            document.getElementById('investmentLoss').textContent = formatCurrency(investLossDollars) + ' (' + maxLossPct.toFixed(2) + '%)';
-            document.getElementById('bindingConstraint').textContent = bindingConstraint;
+            document.getElementById('investmentLoss').textContent = formatCurrency(lossPerShare * shares) + ' (' + maxLossPct.toFixed(2) + '%)';
+            document.getElementById('bindingConstraint').textContent = 'Max Loss ' + maxLossPct.toFixed(2) + '% of stock price';
             document.getElementById('stopLoss').textContent = formatCurrency(stopLoss);
             document.getElementById('lossPerShare').textContent = formatCurrency(lossPerShare);
 
