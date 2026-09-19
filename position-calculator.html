@@ -316,7 +316,7 @@
             </div>
             <div class="result-row">
                 <span class="result-label">Total Investment</span>
-                <span class="result-value" id="investment">-</span>
+                <span class="result-value" id="totalInvestment">-</span>
             </div>
             <div class="result-row">
                 <span class="result-label">Portfolio Risk</span>
@@ -392,59 +392,6 @@
             setError('priceError', '');
         }
 
-        // --- Two-way sync: Max Risk % ↔ Investment Amount ---
-        //    investmentAmount = portfolio × riskPct / maxLossPct   (risk drives amount)
-        //    riskPct = investmentAmount × maxLossPct / portfolio   (amount drives risk)
-        //
-        //    When maxLossPct changes → investmentAmount recalculates, riskPct stays the same.
-
-        let syncing = false;
-        let lastEdited = 'risk'; // 'risk' or 'amount'
-
-        function recalcAmountFromRisk() {
-            if (syncing) return;
-            const portfolio = parseFloat(portfolioInput.value);
-            const riskPct = parseFloat(riskInput.value);
-            const maxLossPct = parseFloat(maxLossInput.value);
-            if (portfolio > 0 && riskPct > 0 && maxLossPct > 0) {
-                lastEdited = 'risk';
-                syncing = true;
-                investmentInput.value = ((portfolio * riskPct) / maxLossPct).toFixed(2);
-                syncing = false;
-            }
-        }
-
-        function recalcRiskFromAmount() {
-            if (syncing) return;
-            const portfolio = parseFloat(portfolioInput.value);
-            const investAmount = parseFloat(investmentInput.value);
-            const maxLossPct = parseFloat(maxLossInput.value);
-            if (portfolio > 0 && investAmount > 0 && maxLossPct > 0) {
-                lastEdited = 'amount';
-                syncing = true;
-                riskInput.value = ((investAmount * maxLossPct) / portfolio).toFixed(2);
-                syncing = false;
-            }
-        }
-
-        // Max Risk % edited → recalculate Investment Amount
-        riskInput.addEventListener('input', recalcAmountFromRisk);
-
-        // Max Loss % edited → recalculate Investment Amount, keep Risk % same
-        maxLossInput.addEventListener('input', recalcAmountFromRisk);
-
-        // Investment Amount edited → recalculate Max Risk %
-        investmentInput.addEventListener('input', recalcRiskFromAmount);
-
-        // Portfolio Size edited → recalculate based on last edited
-        portfolioInput.addEventListener('input', function () {
-            if (lastEdited === 'amount') {
-                recalcRiskFromAmount();
-            } else {
-                recalcAmountFromRisk();
-            }
-        });
-
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             clearErrors();
@@ -509,7 +456,7 @@
             const stopLoss = price - lossPerShare;
 
             document.getElementById('shares').textContent = shares;
-            document.getElementById('investment').textContent = formatCurrency(actualInvestment);
+            document.getElementById('totalInvestment').textContent = formatCurrency(actualInvestment);
             document.getElementById('portfolioRisk').textContent = formatCurrency(portfolioRiskDollars) + ' (' + riskPct.toFixed(2) + '%)';
             document.getElementById('investmentLoss').textContent = formatCurrency(lossPerShare * shares) + ' (' + maxLossPct.toFixed(2) + '%)';
             document.getElementById('bindingConstraint').textContent = 'Max Loss ' + maxLossPct.toFixed(2) + '% of stock price';
