@@ -327,7 +327,7 @@
                 <span class="result-value highlight-red" id="investmentLoss">-</span>
             </div>
             <div class="result-row">
-                <span class="result-label">Stop Loss Distance</span>
+                <span class="result-label">Position Limited By</span>
                 <span class="result-value" id="bindingConstraint">-</span>
             </div>
             <div class="result-row">
@@ -437,29 +437,39 @@
                 return;
             }
 
-            const shares = Math.floor(investAmount / price);
+            // Loss per share from stop: price × maxLossPct / 100
+            const lossPerShare = price * (maxLossPct / 100);
+
+            // Portfolio risk budget in dollars
+            const portfolioRiskDollars = portfolio * (riskPct / 100);
+
+            // Cap shares by both capital and portfolio risk
+            const sharesByCapital = Math.floor(investAmount / price);
+            const sharesByRisk = Math.floor(portfolioRiskDollars / lossPerShare);
+            const shares = Math.min(sharesByCapital, sharesByRisk);
+            const limitedByRisk = sharesByRisk < sharesByCapital;
+
             if (shares === 0) {
-                setError('priceError', 'Stock price exceeds your investment amount.');
+                if (sharesByCapital === 0) {
+                    setError('priceError', 'Stock price exceeds your investment amount.');
+                } else {
+                    setError('riskError', 'Risk budget is too small for even 1 share at this stop.');
+                }
                 resultsDiv.classList.remove('visible');
                 return;
             }
 
             const actualInvestment = shares * price;
-
-            // Loss per share from stop price %: lossPerShare = price × maxLossPct / 100
-            const lossPerShare = price * (maxLossPct / 100);
-
-            // Portfolio risk in dollars
-            const portfolioRiskDollars = portfolio * (riskPct / 100);
-
-            // Stop loss price
+            const actualLoss = lossPerShare * shares;
             const stopLoss = price - lossPerShare;
 
             document.getElementById('shares').textContent = shares;
             document.getElementById('totalInvestment').textContent = formatCurrency(actualInvestment);
             document.getElementById('portfolioRisk').textContent = formatCurrency(portfolioRiskDollars) + ' (' + riskPct.toFixed(2) + '%)';
-            document.getElementById('investmentLoss').textContent = formatCurrency(lossPerShare * shares) + ' (' + maxLossPct.toFixed(2) + '%)';
-            document.getElementById('bindingConstraint').textContent = 'Max Loss ' + maxLossPct.toFixed(2) + '% of stock price';
+            document.getElementById('investmentLoss').textContent = formatCurrency(actualLoss) + ' (' + ((actualLoss / portfolio) * 100).toFixed(2) + '% of portfolio)';
+            document.getElementById('bindingConstraint').textContent = limitedByRisk
+                ? 'Limited by portfolio risk (' + riskPct.toFixed(2) + '%)'
+                : 'Limited by investment amount';
             document.getElementById('stopLoss').textContent = formatCurrency(stopLoss);
             document.getElementById('lossPerShare').textContent = formatCurrency(lossPerShare);
 
