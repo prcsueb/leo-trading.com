@@ -29,6 +29,12 @@
             --highlight-green: #059669;
             --highlight-red: #dc2626;
             --highlight-blue: #2563eb;
+            --mac-display: #1c1c1c;
+            --mac-key: #505050;
+            --mac-key-fn: #636366;
+            --mac-key-op: #ff9f0a;
+            --mac-key-eq: #ff9f0a;
+            --mac-text: #ffffff;
         }
 
         [data-theme="dark"] {
@@ -60,22 +66,66 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 80px 20px 40px;
             transition: background 0.3s, color 0.3s;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            padding: 14px 24px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        nav a { color: var(--text-muted); text-decoration: none; }
+        nav a.active { color: #3b82f6; }
+
+        .layout {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 24px;
+            max-width: 1280px;
+            margin: 0 auto;
+            flex-wrap: wrap;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 32px;
-            width: 100%;
-            max-width: 440px;
+            padding: 28px;
             box-shadow: 0 20px 60px var(--shadow);
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card-position {
+            width: 100%;
+            max-width: 440px;
+            flex: 1 1 400px;
+        }
+
+        .card-mac {
+            width: 100%;
+            max-width: 320px;
+            flex: 0 1 320px;
+            padding: 20px;
+        }
+
+        .card-profit {
+            width: 100%;
+            max-width: 380px;
+            flex: 1 1 320px;
         }
 
         .card-header {
@@ -84,8 +134,8 @@
             align-items: flex-start;
         }
 
-        h1 {
-            font-size: 1.5rem;
+        h1, h2 {
+            font-size: 1.35rem;
             font-weight: 700;
             margin-bottom: 6px;
             color: var(--heading);
@@ -95,8 +145,9 @@
         .subtitle {
             font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             transition: color 0.3s;
+            line-height: 1.4;
         }
 
         .theme-toggle {
@@ -118,9 +169,7 @@
             color: var(--btn-bg);
         }
 
-        .field {
-            margin-bottom: 18px;
-        }
+        .field { margin-bottom: 18px; }
 
         label {
             display: block;
@@ -133,9 +182,7 @@
             transition: color 0.3s;
         }
 
-        .input-wrapper {
-            position: relative;
-        }
+        .input-wrapper { position: relative; }
 
         .input-wrapper .prefix {
             position: absolute;
@@ -145,7 +192,6 @@
             color: var(--input-prefix);
             font-size: 0.95rem;
             pointer-events: none;
-            transition: color 0.3s;
         }
 
         .input-wrapper .suffix {
@@ -156,10 +202,9 @@
             color: var(--input-prefix);
             font-size: 0.8rem;
             pointer-events: none;
-            transition: color 0.3s;
         }
 
-        input {
+        input[type="number"] {
             width: 100%;
             padding: 12px 14px;
             background: var(--input-bg);
@@ -174,9 +219,8 @@
 
         input.has-prefix { padding-left: 36px; }
         input.has-suffix { padding-right: 40px; }
-        input.has-both { padding-left: 36px; padding-right: 40px; }
 
-        input:focus {
+        input[type="number"]:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
@@ -203,7 +247,6 @@
         }
 
         button[type="submit"]:hover { background: var(--btn-hover); }
-        button[type="submit"]:disabled { background: var(--btn-disabled); cursor: not-allowed; }
 
         .results {
             margin-top: 24px;
@@ -212,7 +255,6 @@
             border-radius: 12px;
             overflow: hidden;
             display: none;
-            transition: background 0.3s, border-color 0.3s;
         }
 
         .results.visible { display: block; }
@@ -221,9 +263,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             padding: 14px 18px;
             border-bottom: 1px solid var(--results-divider);
-            transition: border-color 0.3s;
         }
 
         .result-row:last-child { border-bottom: none; }
@@ -231,114 +273,403 @@
         .result-label {
             font-size: 0.85rem;
             color: var(--text-muted);
-            transition: color 0.3s;
         }
 
         .result-value {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--text);
-            transition: color 0.3s;
+            text-align: right;
         }
 
         .highlight-green { color: var(--highlight-green); }
         .highlight-red { color: var(--highlight-red); }
         .highlight-blue { color: var(--highlight-blue); }
+
+        /* --- Mac calculator --- */
+        .mac-shell {
+            background: #1c1c1c;
+            border-radius: 16px;
+            padding: 16px;
+            color: var(--mac-text);
+        }
+
+        .mac-display {
+            text-align: right;
+            font-size: 2.4rem;
+            font-weight: 300;
+            letter-spacing: 0.02em;
+            padding: 12px 8px 20px;
+            min-height: 72px;
+            word-break: break-all;
+            line-height: 1.1;
+        }
+
+        .mac-expression {
+            font-size: 0.85rem;
+            color: #a1a1a6;
+            text-align: right;
+            padding: 0 8px;
+            min-height: 1.2em;
+        }
+
+        .mac-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .mac-keys button {
+            border: none;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            font-size: 1.35rem;
+            font-weight: 400;
+            cursor: pointer;
+            color: #fff;
+            background: var(--mac-key);
+            transition: filter 0.1s, transform 0.05s;
+            font-family: inherit;
+        }
+
+        .mac-keys button:active { transform: scale(0.94); filter: brightness(1.15); }
+        .mac-keys button.fn { background: var(--mac-key-fn); font-size: 1.1rem; }
+        .mac-keys button.op { background: var(--mac-key-op); }
+        .mac-keys button.zero {
+            grid-column: span 2;
+            border-radius: 40px;
+            aspect-ratio: auto;
+            text-align: left;
+            padding-left: 28px;
+        }
+
+        .mac-hint {
+            margin-top: 12px;
+            font-size: 0.72rem;
+            color: #a1a1a6;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .mac-history {
+            margin-top: 14px;
+            background: #2c2c2e;
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .mac-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+            color: #a1a1a6;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mac-history-header button {
+            background: none;
+            border: none;
+            color: #ff9f0a;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: inherit;
+        }
+
+        .mac-history-list {
+            list-style: none;
+            font-size: 0.85rem;
+            color: #e5e5ea;
+        }
+
+        .mac-history-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #3a3a3c;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .mac-history-list li:last-child { border-bottom: none; }
+        .mac-history-empty { color: #8e8e93; text-align: center; font-size: 0.8rem; padding: 8px 0; }
+
+        /* --- Profit scenarios --- */
+        .profit-summary {
+            background: var(--results-bg);
+            border: 1px solid var(--results-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .profit-summary strong {
+            color: var(--heading);
+            font-weight: 700;
+        }
+
+        .scenario {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--results-divider);
+        }
+
+        .scenario:last-of-type { border-bottom: none; }
+
+        .scenario input[type="checkbox"] {
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--btn-bg);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .scenario-body { flex: 1; min-width: 0; }
+
+        .scenario-text {
+            font-size: 0.88rem;
+            line-height: 1.45;
+            color: var(--text);
+        }
+
+        .scenario-profit {
+            margin-top: 6px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--highlight-green);
+        }
+
+        .profit-total {
+            margin-top: 16px;
+            background: var(--results-bg);
+            border: 1px solid var(--results-border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profit-total-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .profit-total-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--highlight-green);
+        }
+
+        .profit-note {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; align-items: center; }
+            .card-mac, .card-position, .card-profit { max-width: 440px; }
+        }
     </style>
 </head>
 <body>
-    <nav style="position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;justify-content:center;gap:32px;padding:14px 24px;background:var(--card-bg);border-bottom:1px solid var(--card-border);font-size:0.85rem;font-weight:600;letter-spacing:0.05em;">
-        <a href="index.html" style="color:var(--text-muted);text-decoration:none;">Home</a>
-        <a href="position-calculator.html" style="color:#3b82f6;text-decoration:none;">Calculator</a>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="position-calculator.html" class="active">Calculator</a>
     </nav>
-    <div class="card" style="margin-top:60px;">
-        <div class="card-header">
-            <h1>Position Sizing Calculator</h1>
-            <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark / light mode">
-                &#9788;
-            </button>
+
+    <div class="layout">
+        <!-- LEFT: Mac-style calculator -->
+        <aside class="card card-mac">
+            <h2>Calculator</h2>
+            <p class="subtitle">Mac-style keypad. Use your keyboard when not typing in a field.</p>
+            <div class="mac-shell" id="macCalc" tabindex="0">
+                <div class="mac-expression" id="macExpression"></div>
+                <div class="mac-display" id="macDisplay">0</div>
+                <div class="mac-keys">
+                    <button type="button" class="fn" data-action="clear">AC</button>
+                    <button type="button" class="fn" data-action="sign">+/−</button>
+                    <button type="button" class="fn" data-action="percent">%</button>
+                    <button type="button" class="op" data-op="/">÷</button>
+                    <button type="button" data-digit="7">7</button>
+                    <button type="button" data-digit="8">8</button>
+                    <button type="button" data-digit="9">9</button>
+                    <button type="button" class="op" data-op="*">×</button>
+                    <button type="button" data-digit="4">4</button>
+                    <button type="button" data-digit="5">5</button>
+                    <button type="button" data-digit="6">6</button>
+                    <button type="button" class="op" data-op="-">−</button>
+                    <button type="button" data-digit="1">1</button>
+                    <button type="button" data-digit="2">2</button>
+                    <button type="button" data-digit="3">3</button>
+                    <button type="button" class="op" data-op="+">+</button>
+                    <button type="button" class="zero" data-digit="0">0</button>
+                    <button type="button" data-action="dot">.</button>
+                    <button type="button" class="op" data-action="equals">=</button>
+                </div>
+                <p class="mac-hint">Keys: 0–9 · + − * / · Enter/= · Esc/C · Backspace · Shift for + * etc.</p>
+                <div class="mac-history">
+                    <div class="mac-history-header">
+                        <span>History</span>
+                        <button type="button" id="clearHistory">Clear</button>
+                    </div>
+                    <ul class="mac-history-list" id="macHistory"></ul>
+                    <div class="mac-history-empty" id="macHistoryEmpty">No calculations yet</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER: Position sizing -->
+        <div class="card card-position">
+            <div class="card-header">
+                <h1>Position Sizing Calculator</h1>
+                <button class="theme-toggle" id="themeToggle" type="button" title="Toggle dark / light mode">
+                    &#9788;
+                </button>
+            </div>
+            <p class="subtitle">Control how much to invest and compute your stop loss.</p>
+
+            <form id="calcForm">
+                <div class="field">
+                    <label for="portfolio">Portfolio Size</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">$</span>
+                        <input type="number" id="portfolio" class="has-prefix" placeholder="10,000" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="error" id="portfolioError"></div>
+                </div>
+
+                <div class="field">
+                    <label for="risk">Max Risk (% of portfolio)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="risk" class="has-suffix" placeholder="2" min="0.01" max="100" step="0.01" required>
+                        <span class="suffix">%</span>
+                    </div>
+                    <div class="error" id="riskError"></div>
+                </div>
+
+                <div class="field">
+                    <label for="investment">Investment Amount (how much to invest)</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">$</span>
+                        <input type="number" id="investment" class="has-prefix" placeholder="2,000" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="error" id="investmentError"></div>
+                </div>
+
+                <div class="field">
+                    <label for="price">Stock Price (per share)</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">$</span>
+                        <input type="number" id="price" class="has-prefix" placeholder="100" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="error" id="priceError"></div>
+                </div>
+
+                <div class="field">
+                    <label for="maxLoss">Max Loss (% of stock price)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="maxLoss" class="has-suffix" placeholder="5" min="0.01" max="100" step="0.01" required>
+                        <span class="suffix">%</span>
+                    </div>
+                    <div class="error" id="maxLossError"></div>
+                </div>
+
+                <button type="submit">Calculate</button>
+            </form>
+
+            <div class="results" id="results">
+                <div class="result-row">
+                    <span class="result-label">Shares to Buy</span>
+                    <span class="result-value highlight-blue" id="shares">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Investment</span>
+                    <span class="result-value" id="totalInvestment">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Portfolio Risk</span>
+                    <span class="result-value highlight-red" id="portfolioRisk">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Max Loss in Dollars</span>
+                    <span class="result-value highlight-red" id="investmentLoss">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Position Limited By</span>
+                    <span class="result-value" id="bindingConstraint">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Stop Loss Price</span>
+                    <span class="result-value highlight-green" id="stopLoss">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Loss Per Share</span>
+                    <span class="result-value" id="lossPerShare">-</span>
+                </div>
+            </div>
         </div>
-        <p class="subtitle">Control how much to invest and compute your stop loss.</p>
 
-        <form id="calcForm">
-            <div class="field">
-                <label for="portfolio">Portfolio Size</label>
-                <div class="input-wrapper">
-                    <span class="prefix">$</span>
-                    <input type="number" id="portfolio" class="has-prefix" placeholder="10,000" min="0.01" step="0.01" required autofocus>
+        <!-- RIGHT: Profit take scenarios -->
+        <aside class="card card-profit">
+            <h2>Profit Take Plan</h2>
+            <p class="subtitle">Select which sell targets to count toward total profit.</p>
+
+            <div class="profit-summary" id="profitSummary">
+                Calculate a position first to size these scenarios.
+            </div>
+
+            <div class="scenario">
+                <input type="checkbox" id="sc1" data-share-pct="5" data-price-pct="5" disabled>
+                <div class="scenario-body">
+                    <div class="scenario-text" id="sc1Text">
+                        If I sell 5% of stocks at a 5% price increase, profit is
+                    </div>
+                    <div class="scenario-profit" id="sc1Profit">—</div>
                 </div>
-                <div class="error" id="portfolioError"></div>
             </div>
 
-            <div class="field">
-                <label for="risk">Max Risk (% of portfolio)</label>
-                <div class="input-wrapper">
-                    <input type="number" id="risk" class="has-suffix" placeholder="2" min="0.01" max="100" step="0.01" required>
-                    <span class="suffix">%</span>
+            <div class="scenario">
+                <input type="checkbox" id="sc2" data-share-pct="15" data-price-pct="15" disabled>
+                <div class="scenario-body">
+                    <div class="scenario-text" id="sc2Text">
+                        If I sell 15% of total stocks at a 15% price increase from buy price, profit is
+                    </div>
+                    <div class="scenario-profit" id="sc2Profit">—</div>
                 </div>
-                <div class="error" id="riskError"></div>
             </div>
 
-            <div class="field">
-                <label for="investment">Investment Amount (how much to invest)</label>
-                <div class="input-wrapper">
-                    <span class="prefix">$</span>
-                    <input type="number" id="investment" class="has-prefix" placeholder="2,000" min="0.01" step="0.01" required>
+            <div class="scenario">
+                <input type="checkbox" id="sc3" data-share-pct="15" data-price-pct="25" disabled>
+                <div class="scenario-body">
+                    <div class="scenario-text" id="sc3Text">
+                        If I sell 15% of total stocks at a 25% price increase from buy price, profit is
+                    </div>
+                    <div class="scenario-profit" id="sc3Profit">—</div>
                 </div>
-                <div class="error" id="investmentError"></div>
             </div>
 
-            <div class="field">
-                <label for="price">Stock Price (per share)</label>
-                <div class="input-wrapper">
-                    <span class="prefix">$</span>
-                    <input type="number" id="price" class="has-prefix" placeholder="100" min="0.01" step="0.01" required>
-                </div>
-                <div class="error" id="priceError"></div>
+            <div class="profit-total">
+                <span class="profit-total-label">Total profit (selected)</span>
+                <span class="profit-total-value" id="profitTotal">$0.00</span>
             </div>
-
-            <div class="field">
-                <label for="maxLoss">Max Loss (% of stock price)</label>
-                <div class="input-wrapper">
-                    <input type="number" id="maxLoss" class="has-suffix" placeholder="5" min="0.01" max="100" step="0.01" required>
-                    <span class="suffix">%</span>
-                </div>
-                <div class="error" id="maxLossError"></div>
-            </div>
-
-            <button type="submit">Calculate</button>
-        </form>
-
-        <div class="results" id="results">
-            <div class="result-row">
-                <span class="result-label">Shares to Buy</span>
-                <span class="result-value highlight-blue" id="shares">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Total Investment</span>
-                <span class="result-value" id="totalInvestment">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Portfolio Risk</span>
-                <span class="result-value highlight-red" id="portfolioRisk">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Max Loss in Dollars</span>
-                <span class="result-value highlight-red" id="investmentLoss">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Position Limited By</span>
-                <span class="result-value" id="bindingConstraint">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Stop Loss Price</span>
-                <span class="result-value highlight-green" id="stopLoss">-</span>
-            </div>
-            <div class="result-row">
-                <span class="result-label">Loss Per Share</span>
-                <span class="result-value" id="lossPerShare">-</span>
-            </div>
-        </div>
+            <p class="profit-note" id="profitRemaining">
+                Remaining shares after selected sells are for you to manage.
+            </p>
+        </aside>
     </div>
 
     <script>
@@ -358,27 +689,27 @@
         }
 
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            setTheme('dark');
-        }
+        if (savedTheme === 'dark') setTheme('dark');
 
         themeToggle.addEventListener('click', function () {
-            const current = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            setTheme(current);
+            setTheme(body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
         });
 
+        function formatCurrency(val) {
+            return '$' + val.toFixed(2);
+        }
+
+        // --- Position sizing ---
         const form = document.getElementById('calcForm');
         const resultsDiv = document.getElementById('results');
-
         const portfolioInput = document.getElementById('portfolio');
         const riskInput = document.getElementById('risk');
         const investmentInput = document.getElementById('investment');
         const maxLossInput = document.getElementById('maxLoss');
         const priceInput = document.getElementById('price');
 
-        function formatCurrency(val) {
-            return '$' + val.toFixed(2);
-        }
+        let lastShares = 0;
+        let lastBuyPrice = 0;
 
         function setError(id, msg) {
             document.getElementById(id).textContent = msg;
@@ -408,12 +739,10 @@
                 setError('portfolioError', 'Enter a positive portfolio size.');
                 valid = false;
             }
-
             if (!riskPct || riskPct <= 0 || riskPct > 100) {
                 setError('riskError', 'Enter a risk between 0.01% and 100%.');
                 valid = false;
             }
-
             if (!investAmount || investAmount <= 0) {
                 setError('investmentError', 'Enter a positive investment amount.');
                 valid = false;
@@ -421,12 +750,10 @@
                 setError('investmentError', 'Investment exceeds portfolio size.');
                 valid = false;
             }
-
             if (!maxLossPct || maxLossPct <= 0 || maxLossPct > 100) {
                 setError('maxLossError', 'Enter a max loss between 0.01% and 100%.');
                 valid = false;
             }
-
             if (!price || price <= 0) {
                 setError('priceError', 'Enter a positive stock price.');
                 valid = false;
@@ -437,13 +764,8 @@
                 return;
             }
 
-            // Loss per share from stop: price × maxLossPct / 100
             const lossPerShare = price * (maxLossPct / 100);
-
-            // Portfolio risk budget in dollars
             const portfolioRiskDollars = portfolio * (riskPct / 100);
-
-            // Cap shares by both capital and portfolio risk
             const sharesByCapital = Math.floor(investAmount / price);
             const sharesByRisk = Math.floor(portfolioRiskDollars / lossPerShare);
             const shares = Math.min(sharesByCapital, sharesByRisk);
@@ -474,7 +796,316 @@
             document.getElementById('lossPerShare').textContent = formatCurrency(lossPerShare);
 
             resultsDiv.classList.add('visible');
+
+            lastShares = shares;
+            lastBuyPrice = price;
+            updateProfitScenarios();
         });
+
+        // --- Profit take scenarios ---
+        const scenarioIds = ['sc1', 'sc2', 'sc3'];
+
+        function sharesForPct(total, pct) {
+            return Math.floor(total * (pct / 100));
+        }
+
+        function scenarioProfit(totalShares, buyPrice, sharePct, pricePct) {
+            const qty = sharesForPct(totalShares, sharePct);
+            const gainPerShare = buyPrice * (pricePct / 100);
+            return { qty: qty, profit: qty * gainPerShare };
+        }
+
+        function updateProfitScenarios() {
+            const summary = document.getElementById('profitSummary');
+
+            if (!lastShares || !lastBuyPrice) {
+                summary.innerHTML = 'Calculate a position first to size these scenarios.';
+                scenarioIds.forEach(function (id) {
+                    document.getElementById(id).disabled = true;
+                    document.getElementById(id + 'Profit').textContent = '—';
+                });
+                document.getElementById('profitTotal').textContent = '$0.00';
+                document.getElementById('profitRemaining').textContent =
+                    'Remaining shares after selected sells are for you to manage.';
+                return;
+            }
+
+            summary.innerHTML = 'If I buy <strong>' + lastShares + '</strong> stocks at <strong>' +
+                formatCurrency(lastBuyPrice) + '</strong> in total:';
+
+            scenarioIds.forEach(function (id) {
+                const cb = document.getElementById(id);
+                const sharePct = parseFloat(cb.dataset.sharePct);
+                const pricePct = parseFloat(cb.dataset.pricePct);
+                const result = scenarioProfit(lastShares, lastBuyPrice, sharePct, pricePct);
+
+                cb.disabled = result.qty === 0;
+                if (result.qty === 0) cb.checked = false;
+
+                document.getElementById(id + 'Text').textContent =
+                    'If I sell ' + sharePct + '% of stocks (which is = ' + result.qty +
+                    ' stocks) at a ' + pricePct + '% price increase from buy price, profit amount is';
+                document.getElementById(id + 'Profit').textContent = formatCurrency(result.profit);
+            });
+
+            updateProfitTotal();
+        }
+
+        function updateProfitTotal() {
+            let total = 0;
+            let soldShares = 0;
+
+            scenarioIds.forEach(function (id) {
+                const cb = document.getElementById(id);
+                if (!cb.checked || cb.disabled) return;
+                const sharePct = parseFloat(cb.dataset.sharePct);
+                const pricePct = parseFloat(cb.dataset.pricePct);
+                const result = scenarioProfit(lastShares, lastBuyPrice, sharePct, pricePct);
+                total += result.profit;
+                soldShares += result.qty;
+            });
+
+            document.getElementById('profitTotal').textContent = formatCurrency(total);
+
+            if (lastShares > 0) {
+                const remaining = Math.max(0, lastShares - soldShares);
+                document.getElementById('profitRemaining').textContent =
+                    'Selected sells: ' + soldShares + ' shares. Remaining: ' + remaining +
+                    ' shares (manage yourself).';
+            }
+        }
+
+        scenarioIds.forEach(function (id) {
+            document.getElementById(id).addEventListener('change', updateProfitTotal);
+        });
+
+        // --- Mac calculator ---
+        const macDisplay = document.getElementById('macDisplay');
+        const macExpression = document.getElementById('macExpression');
+        const macHistory = document.getElementById('macHistory');
+        const macHistoryEmpty = document.getElementById('macHistoryEmpty');
+
+        let macCurrent = '0';
+        let macPrevious = null;
+        let macOperator = null;
+        let macShouldReset = false;
+        let macHistoryItems = [];
+
+        function macFormat(num) {
+            if (!isFinite(num)) return 'Error';
+            const rounded = Math.round(num * 1e10) / 1e10;
+            const str = String(rounded);
+            if (str.length > 12) {
+                return rounded.toPrecision(10).replace(/\.?0+$/, '');
+            }
+            return str;
+        }
+
+        function macUpdateDisplay() {
+            macDisplay.textContent = macCurrent;
+            if (macPrevious !== null && macOperator) {
+                const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[macOperator] || macOperator;
+                macExpression.textContent = macFormat(macPrevious) + ' ' + opSymbol;
+            } else {
+                macExpression.textContent = '';
+            }
+        }
+
+        function macRenderHistory() {
+            macHistory.innerHTML = '';
+            if (macHistoryItems.length === 0) {
+                macHistoryEmpty.style.display = 'block';
+                return;
+            }
+            macHistoryEmpty.style.display = 'none';
+            macHistoryItems.slice().reverse().forEach(function (item) {
+                const li = document.createElement('li');
+                li.textContent = item;
+                macHistory.appendChild(li);
+            });
+        }
+
+        function macInputDigit(d) {
+            if (macShouldReset) {
+                macCurrent = d;
+                macShouldReset = false;
+            } else if (macCurrent === '0' && d !== '.') {
+                macCurrent = d;
+            } else if (macCurrent === '-0' && d !== '.') {
+                macCurrent = '-' + d;
+            } else {
+                if (macCurrent.replace('-', '').length >= 12) return;
+                macCurrent += d;
+            }
+            macUpdateDisplay();
+        }
+
+        function macInputDot() {
+            if (macShouldReset) {
+                macCurrent = '0.';
+                macShouldReset = false;
+            } else if (macCurrent.indexOf('.') === -1) {
+                macCurrent += '.';
+            }
+            macUpdateDisplay();
+        }
+
+        function macClear() {
+            macCurrent = '0';
+            macPrevious = null;
+            macOperator = null;
+            macShouldReset = false;
+            macUpdateDisplay();
+        }
+
+        function macToggleSign() {
+            if (macCurrent === '0' || macCurrent === 'Error') return;
+            macCurrent = macCurrent.charAt(0) === '-' ? macCurrent.slice(1) : '-' + macCurrent;
+            macUpdateDisplay();
+        }
+
+        function macPercent() {
+            const n = parseFloat(macCurrent);
+            if (!isFinite(n)) return;
+            macCurrent = macFormat(n / 100);
+            macUpdateDisplay();
+        }
+
+        function macCompute(a, op, b) {
+            if (op === '+') return a + b;
+            if (op === '-') return a - b;
+            if (op === '*') return a * b;
+            if (op === '/') return b === 0 ? NaN : a / b;
+            return b;
+        }
+
+        function macSetOperator(op) {
+            const value = parseFloat(macCurrent);
+            if (macPrevious !== null && macOperator && !macShouldReset) {
+                const result = macCompute(macPrevious, macOperator, value);
+                if (!isFinite(result)) {
+                    macCurrent = 'Error';
+                    macPrevious = null;
+                    macOperator = null;
+                    macShouldReset = true;
+                    macUpdateDisplay();
+                    return;
+                }
+                macCurrent = macFormat(result);
+                macPrevious = result;
+            } else {
+                macPrevious = value;
+            }
+            macOperator = op;
+            macShouldReset = true;
+            macUpdateDisplay();
+        }
+
+        function macEquals() {
+            if (macOperator === null || macPrevious === null) return;
+            const a = macPrevious;
+            const b = parseFloat(macCurrent);
+            const result = macCompute(a, macOperator, b);
+            const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[macOperator] || macOperator;
+
+            if (!isFinite(result)) {
+                macCurrent = 'Error';
+            } else {
+                const formatted = macFormat(result);
+                macHistoryItems.push(macFormat(a) + ' ' + opSymbol + ' ' + macFormat(b) + ' = ' + formatted);
+                if (macHistoryItems.length > 20) macHistoryItems.shift();
+                macRenderHistory();
+                macCurrent = formatted;
+            }
+
+            macPrevious = null;
+            macOperator = null;
+            macShouldReset = true;
+            macUpdateDisplay();
+        }
+
+        function macBackspace() {
+            if (macShouldReset || macCurrent === 'Error') {
+                macCurrent = '0';
+                macShouldReset = false;
+            } else if (macCurrent.length <= 1 || (macCurrent.length === 2 && macCurrent.charAt(0) === '-')) {
+                macCurrent = '0';
+            } else {
+                macCurrent = macCurrent.slice(0, -1);
+            }
+            macUpdateDisplay();
+        }
+
+        document.querySelectorAll('.mac-keys button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (btn.dataset.digit !== undefined) macInputDigit(btn.dataset.digit);
+                else if (btn.dataset.op) macSetOperator(btn.dataset.op);
+                else if (btn.dataset.action === 'dot') macInputDot();
+                else if (btn.dataset.action === 'clear') macClear();
+                else if (btn.dataset.action === 'sign') macToggleSign();
+                else if (btn.dataset.action === 'percent') macPercent();
+                else if (btn.dataset.action === 'equals') macEquals();
+            });
+        });
+
+        document.getElementById('clearHistory').addEventListener('click', function () {
+            macHistoryItems = [];
+            macRenderHistory();
+        });
+
+        function isTypingInField() {
+            const el = document.activeElement;
+            if (!el) return false;
+            const tag = el.tagName;
+            return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (isTypingInField()) return;
+
+            const key = e.key;
+
+            if ((key >= '0' && key <= '9') || key === '.') {
+                e.preventDefault();
+                if (key === '.') macInputDot();
+                else macInputDigit(key);
+                return;
+            }
+
+            // Shift+8 → *, Shift+= → +, Shift+/ or / → divide, etc. (browser gives the character)
+            if (key === '+' || key === '-' || key === '*' || key === '/' || key === '×' || key === '÷') {
+                e.preventDefault();
+                const op = key === '×' ? '*' : key === '÷' ? '/' : key;
+                macSetOperator(op);
+                return;
+            }
+
+            if (key === 'Enter' || key === '=') {
+                e.preventDefault();
+                macEquals();
+                return;
+            }
+
+            if (key === 'Escape' || key === 'c' || key === 'C') {
+                e.preventDefault();
+                macClear();
+                return;
+            }
+
+            if (key === 'Backspace') {
+                e.preventDefault();
+                macBackspace();
+                return;
+            }
+
+            if (key === '%') {
+                e.preventDefault();
+                macPercent();
+            }
+        });
+
+        macRenderHistory();
+        updateProfitScenarios();
     </script>
 </body>
 </html>
